@@ -55,11 +55,19 @@ check_v2ray() {
 	c=$(ps|grep /opt/svgfw/bin/v2ray|grep -v grep|wc -l)
 	if [ "$c" -ne 1 ];then
 		log "v2ray dead: $c"
-		stop
-		sleep 1
-		start
+		restart
 	else
 		log "v2ray alive: $c"
+	fi
+}
+
+check_iptables() {
+	c=$(iptables -t nat -nL V2RAY |wc -l)
+	if [ "$c" -ne 5 ];then
+		log "iptables dead: $c"
+		restart
+	else
+		log "iptables alive: $c"
 	fi
 }
 
@@ -75,8 +83,15 @@ stop() {
 	stop_v2ray
 }
 
+restart() {
+	stop
+	sleep 1
+	start
+}
+
 check() {
 	check_v2ray
+	check_iptables
 }
 
 if [ "$1" == "start" ];then
@@ -86,7 +101,5 @@ elif [ "$1" == "stop" ];then
 elif [ "$1" == "check" ];then
 	check
 elif [ "$1" == "restart" ];then
-	stop
-	sleep 1
-	start
+	restart
 fi

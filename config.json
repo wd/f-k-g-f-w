@@ -19,15 +19,13 @@
   "outbounds": [
     {
       "protocol": "freedom",
-      "settings": {},
       "streamSettings":{"sockopt": { "mark": 255}},
       "tag": "direct"
     },
     {
          "protocol":"vmess",
          "tag":"a",
-         "streamSettings":{},
-         "settings":{ }
+          "streamSettings":{"sockopt": { "mark": 255}}
     }
   ],
   "routing": {

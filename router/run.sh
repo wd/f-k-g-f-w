@@ -1,4 +1,4 @@
-#!/opt/bin/bash
+#!/bin/bash
 
 log() {
 	echo $(date) "$@"
@@ -25,9 +25,11 @@ stop_ip6tables() {
 start_iptables() {
 	log "start iptables"
 	iptables -t nat -N V2RAY
-	iptables -t nat -A V2RAY -d 10.10.8.1/24 -j RETURN
-	iptables -t nat -A V2RAY -p tcp -j RETURN -m mark --mark 0xff
-	iptables -t nat -A V2RAY -p tcp -j REDIRECT --to-ports 12345
+	iptables -t nat -A V2RAY -d 10.10.10.1/24 -j RETURN
+	iptables -t nat -A V2RAY -i enx000ec6d312c3 -p tcp -j RETURN -m mark --mark 0xff
+	iptables -t nat -A V2RAY -i enx000ec6d312c3 -p tcp -j REDIRECT --to-ports 12345
+	iptables -t nat -A V2RAY -o ppp0 -p tcp -j RETURN -m mark --mark 0xff
+	iptables -t nat -A V2RAY -o ppp0 -p tcp -j REDIRECT --to-ports 12345
 	iptables -t nat -A PREROUTING -p tcp -j V2RAY
 	iptables -t nat -A OUTPUT -p tcp -j V2RAY
 }
@@ -43,16 +45,18 @@ stop_iptables() {
 
 start_v2ray() {
 	log "start v2ray"
-	/opt/svgfw/bin/v2ray -config /opt/gfw/config.json </dev/null >/dev/null 2>&1 &
+	systemctl start v2ray
+	#/usr/bin/v2ray/v2ray -config /etc/v2ray/config.json </dev/null >/dev/null 2>&1 &
 }
 
 stop_v2ray() {
 	log "stop v2ray"
-	killall v2ray
+	systemctl stop v2ray
+	#killall v2ray
 }
 
 check_v2ray() {
-	c=$(ps|grep /opt/svgfw/bin/v2ray|grep -v grep|wc -l)
+	c=$(ps aux|grep /usr/bin/v2ray/v2ray|grep -v grep|wc -l)
 	if [ "$c" -ne 1 ];then
 		log "v2ray dead: $c"
 		restart

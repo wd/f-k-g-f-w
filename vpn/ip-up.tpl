@@ -1,12 +1,15 @@
 #!/bin/bash
 # Generate time: $GEN_TIME
 
-if [ -f /etc/ppp/ip-script-disabled ]; then
-  exit
-fi
-
+# settings
 LOCAL_DNS="114.114.114.114:53,223.5.5.5:53"
 VPN_DNS="8.8.8.8:53,8.8.4.4:53,1.1.1.1:53"
+greendns=/usr/local/Caskroom/miniconda/base/bin/greendns
+############
+
+if [ -f /etc/ppp/ip-script-disabled ]; then
+exit
+fi
 
 export PATH="/bin:/sbin:/usr/sbin:/usr/bin"
 OLDGW=`netstat -nr | grep "^default" | grep -v "ppp" | head -n 1 | awk -F' ' '{print $2}'`
@@ -16,7 +19,7 @@ dscacheutil -flushcache
 $ROUTES
 # routes
 
-/usr/local/Caskroom/miniconda/base/bin/greendns \
+${S}greendns \
     -r greendns \
     -p 53 \
     -t 1.5 \

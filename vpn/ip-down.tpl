@@ -11,6 +11,4 @@ export PATH="/bin:/sbin:/usr/sbin:/usr/bin"
 $ROUTES
 # routes
 
-DNS_PID=`cat /tmp/dns.pid`
-sudo kill -SIGKILL ${S}DNS_PID
-rm /tmp/dns.pid
+sudo killall ts-dns

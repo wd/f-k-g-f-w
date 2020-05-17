@@ -6,7 +6,10 @@ DEST_DIR="./build"
 mkdir -p $DEST_DIR
 
 download() {
-    wget -O $DEST_DIR/cn-cidrs.txt $IP_LIST
+    echo "Downloading .."
+    curl --silent -o $DEST_DIR/cn-cidrs.txt $IP_LIST
+    curl --silent "https://api.github.com/repos/wolf-joe/ts-dns/releases/latest" | jq --arg PLATFORM_ARCH "$(echo `uname -s`)" -r '.assets[] | select(.name | contains($PLATFORM_ARCH)).browser_download_url' | xargs curl --silent -L -o - --url | tar -x -z -v -f - -C $DEST_DIR/ ts-dns gfwlist.txt
+    echo "Done"
 }
 
 generate_routes_add() {
@@ -40,6 +43,7 @@ generate_scripts() {
 main() {
     download
     generate_scripts
+    cp ts-dns.toml $DEST_DIR
 }
 
 main

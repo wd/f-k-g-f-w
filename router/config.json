@@ -1,9 +1,9 @@
 {
   "log" : {
-    "loglevel": ""
+    "loglevel": "none"
   },
   "inbounds": [
-   {
+    {
       "port": 12345,
       "protocol": "dokodemo-door",
       "settings": {
@@ -16,45 +16,106 @@
       }
     }
   ],
+  "dns": {
+    "servers": [
+      {
+        "address": "https://1.1.1.1/dns-query",
+        "domains": [
+          "geosite:geolocation-!cn"
+        ]
+      },
+      "https://dns.google/dns-query",
+      {
+        "address": "114.114.114.114",
+        "port": 53,
+        "domains": [
+          "geosite:cn"
+        ],
+        "expectIPs": [
+          "geoip:cn"
+        ]
+      },
+      "localhost"
+    ]
+  },
   "outbounds": [
     {
       "protocol": "freedom",
+      "settings": {},
       "streamSettings":{"sockopt": { "mark": 255}},
       "tag": "direct"
     },
     {
-         "protocol":"vmess",
-         "tag":"a",
-          "streamSettings":{"sockopt": { "mark": 255}}
+      "protocol": "blackhole",
+      "tag": "block",
+      "settings": {}
+    },
+    {
+      "protocol":"vmess",
+      "tag":"a",
+      "... other settings ..."
     }
   ],
   "routing": {
+    "domainStrategy": "IPIfNonMatch",
     "rules": [
       {
-          "type": "field",
-          "domain": [
-	  	"ext:wd.dat:netflix",
-          	"ext:wd.dat:gfwlist"
-	  ],
-          "outboundTag": "a"
+        "type": "field",
+        "outboundTag": "direct",
+        "protocol": ["bittorrent"]
       },
       {
-          "type": "field",
-          "ip": [
-		"67.198.55.0/24",
-		"91.108.4.0/22",
-		"91.108.8.0/22",
-		"91.108.12.0/22",
-		"91.108.16.0/22",
-		"91.108.56.0/22",
-		"109.239.140.0/24",
-		"149.154.160.0/20",
-		"149.154.164.0/22",
-		"149.154.168.0/22",
-		"149.154.172.0/22",
-		"205.172.60.0/22"
-	  ],
-          "outboundTag": "a"
+        "type": "field",
+        "domain": [
+          "abc.com"
+        ],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:cn"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": [
+          "geoip:cn",
+          "223.5.5.5/32",
+          "114.114.114.114/32"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:geolocation-!cn"
+        ],
+        "outboundTag": "a"
+      },
+      {
+        "type": "field",
+        "ip": [
+          "8.8.8.8",
+          "8.8.4.4",
+          "1.1.1.1",
+          "208.67.222.222",
+          "208.67.220.220",
+          "67.198.55.0/24",
+          "91.108.4.0/22",
+          "91.108.8.0/22",
+          "91.108.12.0/22",
+          "91.108.16.0/22",
+          "91.108.56.0/22",
+          "109.239.140.0/24",
+          "149.154.160.0/20",
+          "149.154.164.0/22",
+          "149.154.168.0/22",
+          "149.154.172.0/22",
+          "205.172.60.0/22"
+        ],
+        "outboundTag": "a"
       }
     ]
   }

@@ -32,7 +32,8 @@ start_iptables() {
 	log "start iptables"
 	iptables -t nat -N V2RAY
 	iptables -t nat -A V2RAY -d $lan -j RETURN
-	iptables -t nat -A V2RAY -s 10.10.8.8 -j RETURN # hardcoded
+	iptables -t nat -A V2RAY -s 10.10.8.8 -j RETURN
+	iptables -t nat -A V2RAY -s 10.10.8.10 -j RETURN
 	iptables -t nat -A V2RAY -p tcp -j RETURN -m mark --mark 0xff
 	iptables -t nat -A V2RAY -p tcp -j REDIRECT --to-ports $port
 	iptables -t nat -A PREROUTING -p tcp -j V2RAY
@@ -102,8 +103,9 @@ restart() {
 
 update() {
     log "update v2ray"
-    curl -s "https://api.github.com/repos/v2ray/v2ray-core/releases/latest" | jq -r '.assets[] | select(.name | endswith("arm64.zip")).browser_download_url' | xargs curl -L -o /tmp/v2ray.zip --url
-	unzip -fo /tmp/v2ray.zip v2ctl v2ray -d $base/bin
+    rm /tmp/v2ray.zip
+    curl -s "https://api.github.com/repos/v2fly/v2ray-core/releases/latest" | jq -r '.assets[] | select(.name | endswith("arm64-v8a.zip")).browser_download_url' | xargs curl -L -o /tmp/v2ray.zip --url
+	unzip -o /tmp/v2ray.zip v2ctl v2ray -d $base/bin
 
 	log "update geosite"
 	curl -s -L 'https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat' -o $(dirname $v2ray)/geosite.dat

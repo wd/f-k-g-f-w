@@ -68,6 +68,7 @@
         "domains": [
           "geosite:cn",
            "geosite:category-games@cn",
+           "<vps-domain>",
            "ntp.org"
         ],
         "expectIPs": ["geoip:cn"]

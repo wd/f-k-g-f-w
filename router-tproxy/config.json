@@ -1,0 +1,187 @@
+{
+#  "log" : {
+#    "loglevel": "info"
+#  },
+  "inbounds": [
+    {
+      "tag":"transparent",
+      "port": 12345,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "network": "tcp,udp",
+        "followRedirect": true
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      },
+      "streamSettings": {
+        "sockopt": {
+          "tproxy": "tproxy",
+          "mark":255
+        }
+      }
+    },
+    {
+      "port": 1080, 
+      "protocol": "socks",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      },
+      "settings": {
+        "auth": "noauth"
+      }
+    }
+  ],
+  "dns": {
+    "hosts": {
+      "dns.google": "8.8.8.8",
+      "dns.pub": "119.29.29.29",
+      "dns.alidns.com": "223.5.5.5"
+    },
+    "servers": [
+      {
+         "address": "https://dns.google/dns-query",
+        "queryStrategy": "UseIPv4"
+      },
+      {
+        "address": "https://1.1.1.1/dns-query",
+        "port": 53,
+        "queryStrategy": "UseIPv4"
+      },
+      {
+        "address": "https://dns.google/dns-query",
+        "queryStrategy": "UseIPv4",
+        "domains": [
+           "geosite:geolocation-!cn"
+        ],
+        "expectIPs": ["geoip:!cn"]
+      },
+      {
+        "address": "114.114.114.114",
+        "port": 53,
+        "queryStrategy": "UseIPv4",
+        "domains": [
+          "geosite:cn",
+           "geosite:category-games@cn",
+           "ntp.org"
+        ],
+        "expectIPs": ["geoip:cn"]
+      }
+    ]
+  },
+  "outbounds": [
+    {
+      "protocol":"vmess",
+      "tag":"proxy"
+      ...
+    },
+    {
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "USE_IP4"
+      },
+      "streamSettings":{"sockopt": { "mark": 255}},
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "block",
+      "settings": {}
+    },
+    {
+      "tag": "dns-out",
+      "protocol": "dns",
+      "proxySettings": {
+        "tag": "proxy"
+      },
+      "streamSettings": {
+        "sockopt": {
+          "mark": 255
+        }
+      } 
+    }
+  ],
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "inboundTag": [
+          "transparent"
+        ],
+        "port": 53,
+        "network": "udp,tcp",
+        "outboundTag": "dns-out" 
+      }, 
+      {
+        "type": "field",
+        "inboundTag": [
+          "transparent"
+        ],
+        "port": 123,
+        "network": "udp",
+        "outboundTag": "direct" 
+      },
+      {
+        "type": "field",
+        "outboundTag": "direct",
+        "protocol": ["bittorrent"]
+      },
+      {
+        "type": "field",
+        "domain": [
+          "abc.com"
+        ],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field", 
+        "ip": [ 
+          "geoip:private",
+          "geoip:cn",
+          "223.5.5.5",
+          "114.114.114.114"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:cn",
+          "geosite:category-games@cn",
+          "geosite:tld-cn",
+          "geosite:apple-cn",
+          "geosite:private"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": [ 
+          "8.8.8.8",
+          "8.8.4.4",
+          "geoip:telegram",
+          "geoip:us"
+        ],
+        "outboundTag": "proxy"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:geolocation-!cn"
+        ],
+        "outboundTag": "proxy"
+      },
+      {
+        "type": "field",
+        "outboundTag": "proxy",
+        "network": "tcp,udp"
+      }
+    ]
+  }
+}
